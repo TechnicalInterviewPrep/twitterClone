@@ -21,6 +21,12 @@ If you're working through this problem by yourself or doing a mock interview wit
 
 ## Resources
 
+Abbreviations that I'll use in the solution:
+  * B - billion (e.g. 10B = 10 billion)
+  * M - million
+  * GB - gigabyte (e.g. 10 GB = 10 gigabytes)
+  * TB - terabyte
+
 
 ## The Solution
 
@@ -39,18 +45,62 @@ Next we'll describe how the user will interact with the application so that we k
 
 #### Constraints
 
-Let’s make a few very simple calculations with the information we just received. We will have around 10 million users. Average number of followed other users is 200. This means that the network of users will have about 200 * 10 million edges. This makes 2 billion edges. If the average number of tweets per day is 10 million the number of favorites will then be 20 million.
+We need to ask some clarifying questions in order to nail down our constraints.
 
-10 million users
-10 million tweets per day
-20 tweet favorites per day
-100 million HTTP requests to the site
-2 billion “follow” relations
-Some users and tweets could generate an extraordinary amount of traffic
+*Q: How many users do we expect this system to handle?*
+*A: You can expect to have 10 million users generating 100 million requests per day.*
+
+*Q: How many other users will the average person be following?*
+*A: We expect that each user will be following 200 other users on average, but expect some extraordinary users with tens of thousands of followers.*
+
+*Q: How many new tweets and new favorites can we expect each day?*
+*A: We expect that there will be a maximum of 10 million tweets per day and each tweet will probably be favorited twice on average but again, expect some big outliers.*
+
+To summarize:
+  * 10M users
+  * 10M tweets per day
+  * 20M tweet favorites per day
+  * 100M requests per day
+  * 2B “follow” relations (10M tweets * 200 followers/following = 2B edges)
+  * Some users and tweets could generate an extraordinary amount of traffic
 
 ##### Load
+100M total requests/day => 1150 req/second
+
+10M tweets/day => 115 tweets/second
+20M favorites/day = > 230 favorites/second
+
+This traffic will be distributed unevenly throughout the day so the system should be able to handle at least a few thousand requests per second.
 
 ##### Data
+
+Storing the tweets:
+
+10M tweets/day => 3.65 tweets/year
+Let's aim for a solution that can efficiently store 10B tweets
+Let's assume that each tweet will be 140 characters.
+1 char = 1 byte 
+10B tweets * 140 bytes/tweet = 1.4 TB  
+
+Storing the "follow" relations:
+
+2B follow relations
+Each relation will contain two user ids (the follower and the followee)
+Let's make each user id 4 bytes, so each follow relation will be 8 bytes
+8 bytes * 2B = 16B bytes = 16 GB
+
+
+Storing the favorites: 
+
+20M favorites/day => 7.3B favorites/year
+Let's aim for a solution that can efficiently store 20B favorites
+A favorite will consists of a user id and a tweet id
+User ids are 4 bytes each
+Tweet ids are 8 bytes each
+Each favorite will be 12 bytes
+12 bytes * 20B = 240B bytes = 240 GB
+
+Total storage capacity = 1.4 TB + 16 GB + 240 GB = ~2.7 TB
 
 ### Step 2: Abstract Design
 
