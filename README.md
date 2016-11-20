@@ -21,13 +21,36 @@ If you're working through this problem by yourself or doing a mock interview wit
 
 ## Resources
 
+
 ## The Solution
 
 ### Step 1: Contraints and Use Cases
 
 #### Use Cases
 
+The first thing that we'll need to do is clarify the use cases.  It's also helpful to note which use cases are read operations and which use cases are write operations.
+
+* Posting new tweets (write)
+* Following a user (write)
+* Favoriting a tweet (write)
+* Displaying data about users and tweets (read)
+
+Next we'll describe how the user will interact with the application so that we know you and the interviewer are on the same page. For example, there will be a profile page for each user, which will show us their latest tweets and will allow for older tweets to be shown. Each such page will have a button for following the user. There will also be a button at the top of the page, which will allow logged in users to open a dialog box and write a message in it. After they click a button the message will be stored and will appear on their profile page. 
+
 #### Constraints
+
+Let’s make a few very simple calculations with the information we just received. We will have around 10 million users. Average number of followed other users is 200. This means that the network of users will have about 200 * 10 million edges. This makes 2 billion edges. If the average number of tweets per day is 10 million the number of favorites will then be 20 million.
+
+10 million users
+10 million tweets per day
+20 tweet favorites per day
+100 million HTTP requests to the site
+2 billion “follow” relations
+Some users and tweets could generate an extraordinary amount of traffic
+
+##### Load
+
+##### Data
 
 ### Step 2: Abstract Design
 
