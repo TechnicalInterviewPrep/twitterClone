@@ -27,8 +27,19 @@ Abbreviations that I'll use in the solution:
   * GB - gigabyte 
   * TB - terabyte
 
+**How to approach system design questions**  
+[Hired In Tech - The System Design Process](https://www.hiredintech.com/classrooms/system-design/lesson/55)
+
+**System design concepts**  
+[Hired In Tech - Scalability Fundamentals](https://www.hiredintech.com/classrooms/system-design/lesson/60)  
+
+**Other resources**  
+[System Design Cheatsheet](https://gist.github.com/banunatina/3959f128a8c7d20f79807fbccdf2e8bc)  
+[Latency Numbers Every Programmer Should Know](https://gist.github.com/jboner/2841832)  
 
 ## The Solution
+
+This example solution is based off of a [Hired In Tech](https://www.hiredintech.com/classrooms/system-design/lesson/67) example solution.
 
 ### Step 1: Use Cases and Constraints
 
