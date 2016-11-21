@@ -1,4 +1,4 @@
-# Twitter System Design
+# Twitter Clone
 
 ![twitter image](https://abs.twimg.com/icons/apple-touch-icon-192x192.png)
 
@@ -125,7 +125,7 @@ Database Layer
     * Fetch who has favorited a tweet 
 
 #### Bottlenecks
-Our application service layer is very light weight since we don't need to do any type of computationally expensive processing.  It's essentially just a wrapper for our database queries.  
+Our application service layer is very light weight since we don't need to do any processing.  It's essentially just a wrapper for our database queries.  
 
 Our bottlenecks are going to occuring in the database layer.
  
