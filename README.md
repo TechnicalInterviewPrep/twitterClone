@@ -99,7 +99,7 @@ Storing the favorites:
 
 Total required storage capacity = 1.4 TB + 16 GB + 240 GB = ~2.7 TB
 
-#### Disk I/O
+##### Disk I/O
 
 Writes:  
   * 115 tweets/second * 140 bytes/tweet = 16 kb/sec  
@@ -142,16 +142,16 @@ Database Layer
 #### Bottlenecks
 Our application service layer is very light weight since we don't need to do any processing.  It's essentially just a wrapper for our database queries.  
 
-Our bottlenecks are going to occuring in the database layer. To recap:
+Our bottlenecks are going to occuring in the database layer. To recap:  
 Total writes: 350 writes/sec => 20 kb/sec  
 Total reads: 800 reads/sec => 2.25 MB/sec 
 
-The reads are most likely going to be the main bottleneck.  
+It depends on how effective our caching implementation will be, but the reads are most likely going to be the main bottleneck. 
  
 ### Step 3: Data Model and API Design
 
 #### Schema Design
-The data for our Twitter clone is highly relational, so we'll be using a relational database in our solution.  This is an example of the schema that you might design for a simplified Twitter clone.
+The data for our Twitter clone is highly relational, so we'll be using a relational database, such as MySQL or PostgreSQL, in our solution.  This is an example of the SQL schema that you might design.
 
 ![sql schema](assets/twitter-sql-schema.png)
 
@@ -209,4 +209,9 @@ Fetch all of the users that have favorited a tweet
 
 ### Step 4: Scalable Design
 
+The image below is an example of a system that you might use to scale your simplified Twitter app.  The first thing you'll notice is that we break the application service layer out into a read and write services, and put them behind a load balancer.  This will help us handle the large loads and allow us to scale read and writes independently of one another.  We added caching to the read service using Memcached, which will allow us to read the most common requests directly from memory instead of having to read from the database.  Reading from memory is 4x faster than reading from SSD and 80x faster than reading from disk.  If a request is not in the cache, it is fowared on to one of the slave databases.  This setup should allow us to address the read bottleneck that we identified in Step 2.  One thing to keep in mind is that as our data grows in size, we may have to start partitioning our databases.
+
+It should also be pointed out that we still have single points of failure in the design below with the load balancers.  If either one of them were to die, then our entire site would go down.  This can be fixed by using either an Active-Active or Active-Passive load balancer setup.
+
+![scalable design](assets/scalable-design.png)
 
