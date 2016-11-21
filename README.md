@@ -67,27 +67,32 @@ To summarize:
 ##### Load
 100M total requests/day => 1150 req/second
 
-10M tweets/day => 115 tweets/second
-20M favorites/day = > 230 favorites/second
-
 This traffic will be distributed unevenly throughout the day so the system should be able to handle at least a few thousand requests per second.
+
+The 100M requests/day are comprised of:
+
+10M tweets/day => 115 tweets/second
+20M favorites/day => 230 favorites/second
+
+Let's assume the remaining 70M requests/day are read requests.  
+70M reads/day => 800 reads/sec  
 
 ##### Data
 
 Storing the tweets:
 
-10M tweets/day => 3.65 tweets/year
-Let's aim for a solution that can efficiently store 10B tweets
-Let's assume that each tweet will be 140 characters.
-1 char = 1 byte 
-10B tweets * 140 bytes/tweet = 1.4 TB  
+10M tweets/day => 3.65 tweets/year  
+Let's assume that we'll need to be able to efficiently store 10B tweets  
+Let's assume that each tweet will be 140 characters.  
+1 char = 1 byte   
+10B tweets * 140 bytes/tweet = 1.4 TB   
 
 Storing the "follow" relations:
 
-2B follow relations
-Each relation will contain two user ids (the follower and the followee)
-Let's make each user id 4 bytes, so each follow relation will be 8 bytes
-8 bytes * 2B = 16B bytes = 16 GB
+2B follow relations  
+Each relation will contain two user ids (the follower and the followee)  
+Let's make each user id 4 bytes, so each follow relation will be 8 bytes  
+8 bytes * 2B = 16B bytes = 16 GB  
 
 
 Storing the favorites: 
@@ -101,6 +106,22 @@ Each favorite will be 12 bytes
 12 bytes * 20B = 240B bytes = 240 GB
 
 Total required storage capacity = 1.4 TB + 16 GB + 240 GB = ~2.7 TB
+
+#### Disk I/O
+
+Writes:  
+115 tweets/second * 140 bytes/tweet = 16 kb/sec  
+230 favorites/second * 12 bytes/favorite = 3 kb/sec  
+Total writes: 350 writes/sec => 20 kb/sec  
+
+*Note: I rounded up to 350 and 20 in order to make the numbers easier to work with.*
+
+Reads:  
+Let's assume that the 70M read requests/day are profile views.  
+Each profile view loads the 20 most recent tweets for the user.   
+800 reads/sec * 20 tweets/read * 140 bytes/tweet =  2.25 MB/sec  
+Total reads: 800 reads/sec => 2.25 MB/sec 
+
 
 ### Step 2: Abstract Design & Bottlenecks
 
