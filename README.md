@@ -2,7 +2,7 @@
 
 ![twitter image](https://abs.twimg.com/icons/apple-touch-icon-192x192.png)
 
-## System Design Challenge
+## System Design Prompt
 
 “Design a simplified version of Twitter where people can post tweets, follow other people and favorite tweets.”
 
@@ -104,7 +104,30 @@ Total required storage capacity = 1.4 TB + 16 GB + 240 GB = ~2.7 TB
 
 ### Step 2: Abstract Design & Bottlenecks
 
+#### Abstract Design
 
+Our backend can be divided into two seperate layers.  The application service layer and the database layer.
+
+Application Service Layer
+  * Handles all incoming requests
+  * Sends read and write requests to the database
+
+Database Layer
+  * Writes
+    * Post a tweet
+    * Follow a user
+    * Favorite a tweet
+  * Reads
+    * Fetch a user's profile data
+    * Fetch tweets for a user
+    * Fetch followers for a user
+    * Fetch who a user is following
+    * Fetch who has favorited a tweet 
+
+#### Bottlenecks
+Our application service layer is very light weight since we don't need to do any type of computationally expensive processing.  It's essentially just a wrapper for our database queries.  
+
+Our bottlenecks are going to occuring in the database layer.
  
 ### Step 3: Data Model and API Design
 
@@ -158,7 +181,7 @@ Sending a tweet
 Following a user  
 `POST /api/users/:username/followers`  
 
-Favoriting a tweet
+Favoriting a tweet  
 `POST /api/users/:username/tweets/:tweet_id/favorites`
 
 Fetch all of the users that have favorited a tweet  
