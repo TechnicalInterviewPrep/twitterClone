@@ -10,14 +10,14 @@
 
 If you're working through this problem by yourself or doing a mock interview with a friend, these are the answers that the interviewer would give to clarifying questions.
 
-*Q: How many users do we expect this system to handle?*
-*A: You can expect to have 10 million users generating 100 million requests per day.*
+*Q: How many users do we expect this system to handle?*  
+*A: You can expect to have 10 million users generating 100 million requests per day.*  
 
-*Q: How many other users will the average person be following?*
-*A: We expect that each user will be following 200 other users on average, but expect some extraordinary users with tens of thousands of followers.*
+*Q: How many other users will the average person be following?*  
+*A: We expect that each user will be following 200 other users on average, but expect some extraordinary users with tens of thousands of followers.*  
 
-*Q: How many new tweets and new favorites can we expect each day?*
-*A: We expect that there will be a maximum of 10 million tweets per day and each tweet will probably be favorited twice on average but again, expect some big outliers.*
+*Q: How many new tweets and new favorites can we expect each day?*  
+*A: We expect that there will be a maximum of 10 million tweets per day and each tweet will probably be favorited twice on average but again, expect some big outliers.*  
 
 ## Resources
 
@@ -47,14 +47,14 @@ Next we'll describe how the user will interact with the application so that we k
 
 We need to ask some clarifying questions in order to nail down our constraints.
 
-*Q: How many users do we expect this system to handle?*
-*A: You can expect to have 10 million users generating 100 million requests per day.*
+*Q: How many users do we expect this system to handle?*  
+*A: You can expect to have 10 million users generating 100 million requests per day.*  
 
-*Q: How many other users will the average person be following?*
-*A: We expect that each user will be following 200 other users on average, but expect some extraordinary users with tens of thousands of followers.*
+*Q: How many other users will the average person be following?*  
+*A: We expect that each user will be following 200 other users on average, but expect some extraordinary users with tens of thousands of followers.*  
 
-*Q: How many new tweets and new favorites can we expect each day?*
-*A: We expect that there will be a maximum of 10 million tweets per day and each tweet will probably be favorited twice on average but again, expect some big outliers.*
+*Q: How many new tweets and new favorites can we expect each day?*  
+*A: We expect that there will be a maximum of 10 million tweets per day and each tweet will probably be favorited twice on average but again, expect some big outliers.*  
 
 To summarize:
   * 10M users
@@ -102,24 +102,24 @@ Each favorite will be 12 bytes
 
 Total required storage capacity = 1.4 TB + 16 GB + 240 GB = ~2.7 TB
 
-### Step 2: Abstract Design && Bottlenecks
+### Step 2: Abstract Design & Bottlenecks
 
 
  
 ### Step 3: Data Model and API Design
 
 #### Schema Design
-The data for our Twitter clone is highly relational, so we'll be using a relational database in our solution.
+The data for our Twitter clone is highly relational, so we'll be using a relational database in our solution.  This is an example of the schema that you might design for a simplified Twitter clone.
 
 ![sql schema](assets/twitter-sql-schema.png)
 
 #### Indexes  
 
-Now that we know what out database schema is going to look like, we need to think about what queries will be send to our database.  This will allow us to create indexes that will optimize our response time.  
+Now that we know what out database schema is going to look like, we need to think about what queries will be sent to our database.  This will allow us to create indexes that will optimize our lookup times. 
 
 To get the user data for for a given username we can index by username.   
 
-When we view someone's profile we'll want to see their 20 most recent tweets. We can have an index that includes the `user_id` and `created_at` columns.  When we have an index over more than one column the order of the columns matters. If our index looks like this: (`user_id`, `created_at`), making a query filtering by just `user_id` will take advantage of the index even though we are not filtering by the second column.  
+When we view someone's profile we'll want to see their 20 most recent tweets. This means that we could use a query, which not only filters by user_id but also orders by creation date (`created_at`) and limits the result.  We can accomplish this by creating an index that includes the `user_id` and `created_at` columns.  When we have an index over more than one column the order of the columns matters. If our index looks like this: (`user_id`, `created_at`), making a query filtering by just `user_id` will take advantage of the index even though we are not filtering by the second column.So, such an index will allow us to filter either by just user_id, or by both columns. This will allow us to fetch all tweets authored by a given user or to isolate just the tweets created in a given time frame.      
 
 To get the users following someone we can index by `followee_id`.   
 To get the users followed by someone we can index by `follower_id`.  
