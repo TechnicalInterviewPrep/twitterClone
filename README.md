@@ -8,7 +8,7 @@
 
 ## Clarifying Questions
 
-If you're working through this problem by yourself or doing a mock interview with a friend, these are the answers that the interviewer would give to the following questions:
+If you're working through this problem by yourself or doing a mock interview with a friend, these are the answers that the interviewer would give to clarifying questions.
 
 *Q: How many users do we expect this system to handle?*
 *A: You can expect to have 10 million users generating 100 million requests per day.*
@@ -22,15 +22,15 @@ If you're working through this problem by yourself or doing a mock interview wit
 ## Resources
 
 Abbreviations that I'll use in the solution:
-  * B - billion (e.g. 10B = 10 billion)
+  * B - billion 
   * M - million
-  * GB - gigabyte (e.g. 10 GB = 10 gigabytes)
+  * GB - gigabyte 
   * TB - terabyte
 
 
 ## The Solution
 
-### Step 1: Contraints and Use Cases
+### Step 1: Use Cases and Constraints
 
 #### Use Cases
 
@@ -100,15 +100,71 @@ Tweet ids are 8 bytes each
 Each favorite will be 12 bytes
 12 bytes * 20B = 240B bytes = 240 GB
 
-Total storage capacity = 1.4 TB + 16 GB + 240 GB = ~2.7 TB
+Total required storage capacity = 1.4 TB + 16 GB + 240 GB = ~2.7 TB
 
-### Step 2: Abstract Design
-
-
-### Step 3: Bottlenecks
-
-  
-### Step 4: Technology Decisions 
+### Step 2: Abstract Design && Bottlenecks
 
 
-### Step 5: Scaling
+ 
+### Step 3: Data Model and API Design
+
+#### Schema Design
+The data for our Twitter clone is highly relational, so we'll be using a relational database in our solution.
+
+![sql schema](assets/twitter-sql-schema.png)
+
+#### Indexes  
+
+Now that we know what out database schema is going to look like, we need to think about what queries will be send to our database.  This will allow us to create indexes that will optimize our response time.  
+
+To get the user data for for a given username we can index by username.   
+
+When we view someone's profile we'll want to see their 20 most recent tweets. We can have an index that includes the `user_id` and `created_at` columns.  When we have an index over more than one column the order of the columns matters. If our index looks like this: (`user_id`, `created_at`), making a query filtering by just `user_id` will take advantage of the index even though we are not filtering by the second column.  
+
+To get the users following someone we can index by `followee_id`.   
+To get the users followed by someone we can index by `follower_id`.  
+
+If we want to fetch the tweets that a user has favorited, we will need to join `favorites` with `tweets` and to filter by `user_id`. The columns used for joining will be the `tweet_id` in  `favorites` and the `id` in `tweets`.
+The above means that it makes sense to add two indexes - one on the `user_id` column and one on the `tweet_id` column.
+
+Table | Indexes 
+--- | --- | ---
+users | username
+tweets | user_id, created_at
+connections | followee_id <br/> follower_id
+favorites | user_id <br/> tweet_id
+
+#### API Design
+We'll be building a RESTful API for our solution.  Here are the endpoints that we will use.
+
+Fetching profile data for a user  
+`GET /api/users/:username`
+
+Fetch tweets for a given user that are ordered by date  
+`GET /api/users/:username/tweets`  
+
+We also will want to specify a query parameter to fetch older tweets.  In this example, we're saying that we want to fetch tweets that occur before the timestamp '2016-11-03+20:02:33.02819Z'.  
+`GET /api/users/:username/tweets?before=2016-11-03+20:02:33.02819Z`
+
+Fetch a users followers  
+`GET /api/users/:username/followers`  
+
+Fetch who a user is following  
+`GET /api/users/:username/following`  
+
+Sending a tweet  
+`POST /api/users/:username/tweets`  
+
+Following a user  
+`POST /api/users/:username/followers`  
+
+Favoriting a tweet
+`POST /api/users/:username/tweets/:tweet_id/favorites`
+
+Fetch all of the users that have favorited a tweet  
+`GET /api/users/:username/tweets/:tweet_id/favorites`
+
+
+### Step 4: Scalable Design
+
+
