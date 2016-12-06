@@ -4,7 +4,7 @@
 
 ## System Design Prompt
 
-“Design a simplified version of Twitter where people can post tweets, follow other people and favorite tweets.”
+Design a simplified version of Twitter where people can post tweets, follow other people and favorite tweets.
 
 ## Clarifying Questions
 
@@ -24,6 +24,7 @@ If you're working through this problem by yourself or doing a mock interview wit
 Abbreviations that I'll use in the solution:
   * B - billion 
   * M - million
+  * kB - kilobyte
   * GB - gigabyte 
   * TB - terabyte
 
@@ -113,10 +114,10 @@ Total required storage capacity = 1.4 TB + 16 GB + 240 GB = ~2.7 TB
 ##### Disk I/O
 
 Writes:  
-  * 115 tweets/second * 140 bytes/tweet = 16 kb/sec  
-  * 230 favorites/second * 12 bytes/favorite = 3 kb/sec  
+  * 115 tweets/second * 140 bytes/tweet = 16 kB/sec  
+  * 230 favorites/second * 12 bytes/favorite = 3 kB/sec  
 
-Total writes: 350 writes/sec => 20 kb/sec  
+Total writes: 350 writes/sec => 20 kB/sec  
 
 *Note: I rounded up to 350 and 20 in order to make the numbers easier to work with.*
 
@@ -154,7 +155,7 @@ Database Layer
 Our application service layer is very light weight since we don't need to do any processing.  It's essentially just a wrapper for our database queries.  
 
 Our bottlenecks are going to occuring in the database layer. To recap:  
-Total writes: 350 writes/sec => 20 kb/sec  
+Total writes: 350 writes/sec => 20 kB/sec  
 Total reads: 800 reads/sec => 2.25 MB/sec 
 
 It depends on how effective our caching implementation will be, but the reads are most likely going to be the main bottleneck. 
@@ -220,9 +221,20 @@ Fetch all of the users that have favorited a tweet
 
 ### Step 4: Scalable Design
 
-The image below is an example of a system that you might use to scale your simplified Twitter app.  The first thing you'll notice is that we break the application service layer out into a read and write services, and put them behind a load balancer.  This will help us handle the large loads and allow us to scale read and writes independently of one another.  We added caching to the read service using Memcached, which will allow us to read the most common requests directly from memory instead of having to read from the database.  Reading from memory is 4x faster than reading from SSD and 80x faster than reading from disk.  If a request is not in the cache, it is fowared on to one of the slave databases.  This setup should allow us to address the read bottleneck that we identified in Step 2.  One thing to keep in mind is that as our data grows in size, we may have to start partitioning our databases.
+The image below is an example of a system that you might use to scale your simplified Twitter app.  The first thing you'll notice is that we break the application service layer out into a read and write services, and put them behind an active-passive load balancer setup.  This will help us handle the large loads and allow us to scale read and writes independently of one another.  We added caching to the read service using Memcached, which will allow us to read the most common requests directly from memory instead of having to make a database query.  Reading from memory is 4x faster than reading from SSD and 80x faster than reading from disk.  If a request is not in the cache, it is fowared on to one of the slave databases.  This setup should allow us to address the read bottleneck that we identified in Step 2.  One thing to keep in mind is that as our data grows in size, we may have to start partitioning our databases.
 
-It should also be pointed out that we still have single points of failure in the design below with the load balancers.  If either one of them were to die, then our entire site would go down.  This can be fixed by using either an Active-Active or Active-Passive load balancer setup.
+If you're not familiar with some of these scaling concepts, I would recommend you check out this [scalability lecture](https://www.youtube.com/watch?v=-W9F__D3oY4&t=6s).
+
 
 ![scalable design](assets/scalable-design.png)
+
+
+### Going Further
+
+Other topics that were not included in this solution, but might come up during the interview are:
+
+Authentication  
+Sessions  
+Security  
+Data Partitioning 
 
